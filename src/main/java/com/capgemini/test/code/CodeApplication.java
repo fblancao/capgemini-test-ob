@@ -2,10 +2,12 @@ package com.capgemini.test.code;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 
+/**
+ * Feature annotations such as {@code @EnableFeignClients} live in dedicated configuration classes
+ * (see {@code FeignConfiguration}) so that test slices (@WebMvcTest, @DataJpaTest) do not load them.
+ */
 @SpringBootApplication
-@EnableFeignClients
 public class CodeApplication {
 
   public static void main(String[] args) {
