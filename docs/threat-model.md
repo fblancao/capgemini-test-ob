@@ -35,6 +35,7 @@
 ## 3. Diagrama de flujo de datos (DFD)
 
 > Sintaxis Mermaid de Azure DevOps (`::: mermaid`), renderizada en la Wiki de Azure DevOps (también como *code wiki* publicada desde este repositorio).
+> Variante con el mismo contenido para la UI web de GitHub: [threat-model-github.md](threat-model-github.md).
 
 ::: mermaid
 graph LR
