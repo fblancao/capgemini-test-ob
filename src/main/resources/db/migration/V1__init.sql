@@ -19,6 +19,9 @@ CREATE TABLE users (
 -- Insertar datos iniciales
 INSERT INTO rooms (name) VALUES ('Sala 1'), ('Sala 2');
 
-INSERT INTO users (name, email, role, room_id) VALUES
-('Juan Pérez', 'juan@example.com', 'ADMIN', 1),
-('María López', 'maria@example.com', 'USER', 2);
+-- NOTE: the original seed omitted the NOT NULL columns dni/phone (the migration could never succeed)
+-- and used the role 'USER', which is not allowed by the business rules (only admin/superadmin).
+INSERT INTO users (name, email, dni, phone, role, room_id) VALUES
+('Juan Pérez', 'juan@example.com', '11111111H', '600000001', 'ADMIN', 1),
+('María López', 'maria@example.com', '22222222J', '600000002', 'SUPERADMIN', 2);
+

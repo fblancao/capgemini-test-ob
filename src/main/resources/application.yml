@@ -1,20 +1,48 @@
 spring:
+  application:
+    name: code
   datasource:
-    url: jdbc:postgresql://localhost:5432/users
-    username: user
-    password: password
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/users}
+    username: ${DB_USERNAME:user}
+    password: ${DB_PASSWORD:password}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
   jpa:
     hibernate:
       ddl-auto: none
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
+    show-sql: false
+    open-in-view: false
   flyway:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
-
+  cloud:
+    openfeign:
+      okhttp:
+        enabled: true
+      client:
+        config:
+          default:
+            connect-timeout: 2000
+            read-timeout: 5000
+            logger-level: basic
 
 external:
   service:
-    url: http://localhost:1080
+    url: ${EXTERNAL_SERVICE_URL:http://localhost:1080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  level:
+    com.capgemini.test.code.clients: DEBUG
+
