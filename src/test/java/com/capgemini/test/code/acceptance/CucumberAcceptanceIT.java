@@ -13,8 +13,8 @@ import org.junit.platform.suite.api.Suite;
  * Runs the Gherkin acceptance criteria of {@code src/test/resources/features} (executed by failsafe).
  * HTML report: {@code target/cucumber-report.html}.
  *
- * <p>Overrides the default tag filter of {@code junit-platform.properties}, which prevents the Cucumber engine from
- * running the scenarios when an IDE discovers it outside this suite (e.g. in a unit test run).
+ * <p>The configuration matches the defaults of {@code junit-platform.properties}, used when an IDE discovers the
+ * feature files directly through the Cucumber engine (outside this suite).
  */
 @Suite
 @IncludeEngines("cucumber")

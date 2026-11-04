@@ -13,7 +13,7 @@
       <env name="TESTCONTAINERS_RYUK_DISABLED" value="true" />
     </envs>
     <patterns>
-      <pattern testClass=".*(Test|IT)" />
+      <pattern testClass="^(?!.*Cucumber).*(Test|IT)$" />
     </patterns>
     <method v="2">
       <option name="Make" enabled="true" />

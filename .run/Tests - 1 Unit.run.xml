@@ -9,6 +9,9 @@
     <option name="TEST_SEARCH_SCOPE">
       <value defaultName="singleModule" />
     </option>
+    <envs>
+      <env name="TESTCONTAINERS_RYUK_DISABLED" value="true" />
+    </envs>
     <patterns>
       <pattern testClass=".*Test" />
     </patterns>
