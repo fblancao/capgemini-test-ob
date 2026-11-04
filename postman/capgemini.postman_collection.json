@@ -68,7 +68,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"message\": \"message\"\n}",
+					"raw": "{\n    \"email\": \"email@email.com\",\n    \"message\": \"usuario guardado\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -96,7 +96,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"dni\": \"222222\"\n}",
+					"raw": "{\n    \"phone\": \"677998899\",\n    \"message\": \"usuario guardado\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -104,14 +104,96 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:1080/check-dni",
+					"raw": "http://localhost:1080/sms",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "1080",
 					"path": [
-						"check-dni"
+						"sms"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create user (room 1)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"pablo\",\n    \"email\": \"email@email.com\",\n    \"phone\": \"677998899\",\n    \"rol\": \"admin\",\n    \"dni\": \"23454234W\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/rooms/1/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rooms",
+						"1",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create user (invalid dni -> 409)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"ana\",\n    \"email\": \"ana@email.com\",\n    \"phone\": \"677998800\",\n    \"rol\": \"superadmin\",\n    \"dni\": \"99999999w\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/rooms/1/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rooms",
+						"1",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user (room 1)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/rooms/1/users/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rooms",
+						"1",
+						"users",
+						"1"
 					]
 				}
 			},

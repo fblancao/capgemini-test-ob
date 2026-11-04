@@ -173,3 +173,118 @@ La aplicación debe gestionar salas y usuarios bajo las siguientes condiciones:
 
 - Subir el proyecto a un repositorio público personal.
 - Todos los commits deben estar realizados en la rama main.
+
+---
+
+# Solución
+
+## Ejecución
+
+```bash
+# 1. Infraestructura (PostgreSQL + mock-server), tal y como indica el enunciado
+cd docker
+docker-compose up
+
+# 2. Aplicación (puerto 8080)
+mvn spring-boot:run
+
+# Alternativa: infraestructura + aplicación en contenedores
+docker-compose --profile app up --build
+```
+
+- Swagger UI: http://localhost:8080/swagger-ui.html (OpenAPI: `/v3/api-docs`)
+- Health / probes: http://localhost:8080/actuator/health (`/liveness`, `/readiness`)
+- Colección Postman actualizada en `postman/` (incluye las nuevas operaciones).
+
+La configuración admite variables de entorno (12-factor): `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `DB_POOL_SIZE`,
+`EXTERNAL_SERVICE_URL`.
+
+## API
+
+| Operación       | Método y ruta                      | OK                                  | KO                                                     |
+|-----------------|------------------------------------|-------------------------------------|--------------------------------------------------------|
+| Crear usuario   | `POST /rooms/1/users`              | `201 Created` + `{"id": 3}` + `Location` | `409` `{"code": 409, "message": "error validation <campo>"}` |
+| Obtener usuario | `GET /rooms/1/users/{id}`          | `200 OK` + usuario                  | `404` `{"code": 404, "message": "..."}`                 |
+
+La sala forma parte de la ruta (`/rooms/{roomId}/users`): el enunciado trabaja con la sala 1, pero el diseño admite N salas
+sin cambios. Un usuario sólo se encuentra en su sala (consultarlo en otra devuelve `404`).
+
+Errores (siempre con el cuerpo `{"code", "message"}` del enunciado):
+
+| Caso                                                   | HTTP | `message`                               |
+|--------------------------------------------------------|------|-----------------------------------------|
+| Nombre vacío o de más de 6 caracteres                  | 409  | `error validation userName`             |
+| Email sin `@` o sin `.` (o ya existente)               | 409  | `error validation email`                |
+| Rol distinto de `admin` / `superadmin`                 | 409  | `error validation rol`                  |
+| DNI rechazado por la API externa (409 del mock-server) | 409  | `error validation dni`                  |
+| Teléfono vacío / DNI o teléfono duplicados             | 409  | `error validation phone` / `... dni`    |
+| Sala o usuario inexistente                             | 404  | `room 9 not found` / `user 9 not found in room 1` |
+| API de DNI no disponible (timeout, 5xx...)             | 503  | `external service unavailable: check-dni` |
+| JSON mal formado / id no numérico                      | 400  | `malformed request`                     |
+
+Orden de validación (de más barata a más cara): reglas de campos → existencia de la sala → email ya existente → API de DNI.
+Tras guardar se notifica: **admin → email**, **superadmin → SMS**, con el mensaje `usuario guardado`. Un fallo de la
+notificación se registra en el log pero no deshace el alta (el usuario ya está guardado).
+
+## Arquitectura
+
+Arquitectura hexagonal (puertos y adaptadores) organizada por *bounded context*, para que nuevos contextos (pagos, pedidos...)
+se añadan como paquetes hermanos de `user` reutilizando `shared` y `clients`:
+
+```
+com.capgemini.test.code
+├── clients/            Clientes Feign de las APIs externas (paquete propuesto por el enunciado; compartidos)
+├── shared/
+│   ├── domain/         Excepciones base por categoría (Validation→409, NotFound→404, ExternalService→503)
+│   └── infrastructure/ Manejador global de errores REST, configuración de Feign
+└── user/
+    ├── domain/         Modelo (User, Role, NotificationChannel) y excepciones. Java puro, sin framework
+    ├── application/    Casos de uso (CreateUserService, GetUserService, UserNotificationService)
+    │   └── port/       in: CreateUserUseCase, GetUserUseCase · out: UserRepository, RoomRepository, DniValidator, NotificationSender
+    └── infrastructure/ Adaptadores: REST, JPA, Feign (DNI y notificaciones) y el cableado Spring (UserConfiguration)
+```
+
+- **Abstracción del framework**: dominio y aplicación no dependen de Spring; se instancian en `UserConfiguration`.
+- **Patrones**: Strategy (un `NotificationSender` por canal, elegido por el rol), Adapter (puertos de salida),
+  Factory method (`User.create` valida / `User.restore` reconstruye), Command (`CreateUserCommand`),
+  Singleton container (tests).
+- **Persistencia**: Flyway. `V2__ids_as_bigint.sql` alinea los ids con el requisito *long incremental*.
+  Las restricciones `UNIQUE` de BD son la última defensa ante peticiones concurrentes y se traducen al error del campo.
+
+## Escalabilidad y capacidad (condiciones opcionales)
+
+- Servicio *stateless* (sin sesión) → escalado horizontal detrás de un balanceador; imagen Docker sin root y con
+  `MaxRAMPercentage`; probes de liveness/readiness para orquestadores.
+- Pool de conexiones configurable (`DB_POOL_SIZE`), `open-in-view` desactivado, timeouts en los clientes HTTP.
+- Siguientes pasos para "millones de peticiones": notificaciones asíncronas mediante *transactional outbox* + broker,
+  circuit breaker/reintentos (Resilience4j) para las APIs externas y réplicas de lectura para las consultas.
+
+## Tests
+
+| Tipo        | Herramientas                                            | Ejecución                         |
+|-------------|---------------------------------------------------------|-----------------------------------|
+| Unitarios   | JUnit 5, Mockito, AssertJ, `@WebMvcTest`                | `mvn test` (sin infraestructura)  |
+| Integración | Testcontainers (PostgreSQL 17), WireMock, OkHttp/Feign  | `mvn verify` (requiere Docker)    |
+| Aceptación  | Cucumber (Gherkin en español), RestAssured              | `mvn verify` (requiere Docker)    |
+
+- Los criterios de aceptación están en `src/test/resources/features/users.feature`.
+- WireMock reproduce el contrato de `docker/mockserver-config/init.json`.
+- Informes: `target/cucumber-report.html`, cobertura en `target/site/jacoco` y `target/site/jacoco-it`.
+- CI: GitHub Actions (`.github/workflows/ci.yml`) ejecuta `mvn verify` en cada push / PR a `main`.
+- Con Podman o redes que no permiten descargar la imagen de Ryuk: `TESTCONTAINERS_RYUK_DISABLED=true`.
+
+## Cambios sobre el esqueleto proporcionado
+
+| Fichero                    | Cambio y motivo                                                                                     |
+|----------------------------|-----------------------------------------------------------------------------------------------------|
+| `V1__init.sql`             | El seed insertaba usuarios sin `dni`/`phone` (`NOT NULL`) y con rol `USER`: la migración no podía ejecutarse nunca. |
+| `DniClient`                | Usaba `feign.okhttp.OkHttpClient` sin la dependencia `feign-okhttp` (no compilaba). Se añade la dependencia (OkHttp es necesario para `PATCH`) y se elimina el `@Configuration` anidado (Spring Cloud OpenFeign desaconseja que la configuración de un cliente sea escaneada). |
+| `CodeApplication`          | `@EnableFeignClients` pasa a `FeignConfiguration` para que los *test slices* no carguen Feign (guía "User Configuration and Slicing" de Spring Boot). |
+| `pom.xml`                  | Spring Boot 3.2.0 → 3.2.12 y Spring Cloud 2023.0.0 → 2023.0.5 (parches de seguridad, misma línea). Flyway gestionado por Boot. |
+| `application.yml`          | Variables de entorno, timeouts de Feign, `open-in-view: false`, `show-sql: false`, actuator.        |
+| `docker-compose.yml`       | Versiones de imágenes fijadas (`latest` no es reproducible), healthcheck y servicio opcional `app`. |
+| Postman                    | La petición `sms` apuntaba a `/check-dni`; se añaden las operaciones de la API.                       |
+
+Nota: Flyway 9.22 (el gestionado por Spring Boot 3.2) muestra un aviso con PostgreSQL 17 (*support has not been tested*);
+es sólo informativo y toda la batería de tests de integración se ejecuta contra PostgreSQL 17.
+

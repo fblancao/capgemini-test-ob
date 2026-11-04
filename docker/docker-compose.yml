@@ -2,7 +2,8 @@ version: '3.8'
 
 services:
   mockserver:
-    image: mockserver/mockserver:latest
+    # Versions pinned (instead of "latest") for reproducible environments
+    image: mockserver/mockserver:5.15.0
     container_name: mockserver
     ports:
       - "1080:1080"
@@ -13,7 +14,8 @@ services:
       - ./mockserver-config:/config
 
   postgres:
-    image: postgres:latest
+    # Same major version used by the integration tests (Testcontainers)
+    image: postgres:17
     container_name: postgres_db
     restart: always
     ports:
@@ -24,6 +26,31 @@ services:
       POSTGRES_DB: users
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d users"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Optional: the application itself (docker-compose --profile app up --build)
+  app:
+    profiles: ["app"]
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: users_app
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/users
+      DB_USERNAME: user
+      DB_PASSWORD: password
+      EXTERNAL_SERVICE_URL: http://mockserver:1080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mockserver:
+        condition: service_started
 
 volumes:
   postgres_data:
