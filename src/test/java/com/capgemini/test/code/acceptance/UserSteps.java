@@ -22,6 +22,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Step definitions (a new instance per scenario).
+ *
+ * <p>Spanish accents are written as Unicode escapes so the steps match the UTF-8 feature file whatever
+ * encoding the compiler (Maven, IDE) is configured with.
  */
 public class UserSteps {
 
@@ -43,17 +46,17 @@ public class UserSteps {
     jdbcTemplate.update("DELETE FROM users WHERE email NOT IN " + SEED_EMAILS);
   }
 
-  @Dado("que la API de DNI no está disponible")
+  @Dado("que la API de DNI no est\u00e1 disponible")
   public void dniApiUnavailable() {
     ExternalServicesStub.dniServiceFailsWith(500);
   }
 
-  @Dado("que la API de notificaciones no está disponible")
+  @Dado("que la API de notificaciones no est\u00e1 disponible")
   public void notificationApiUnavailable() {
     ExternalServicesStub.notificationServiceFailsWith(500);
   }
 
-  @Dado("un usuario con nombre {string}, email {string}, teléfono {string}, rol {string} y dni {string}")
+  @Dado("un usuario con nombre {string}, email {string}, tel\u00e9fono {string}, rol {string} y dni {string}")
   public void aUser(String name, String email, String phone, String rol, String dni) {
     user = new LinkedHashMap<>();
     user.put("name", name);
@@ -63,7 +66,7 @@ public class UserSteps {
     user.put("dni", dni);
   }
 
-  @Dado("un usuario guardado en la sala {long} con nombre {string}, email {string}, teléfono {string}, rol {string} y dni {string}")
+  @Dado("un usuario guardado en la sala {long} con nombre {string}, email {string}, tel\u00e9fono {string}, rol {string} y dni {string}")
   public void aSavedUser(long roomId, String name, String email, String phone, String rol, String dni) {
     aUser(name, email, phone, rol, dni);
     saveUserInRoom(roomId);
@@ -89,7 +92,7 @@ public class UserSteps {
     response = given().port(port).when().get("/rooms/{roomId}/users/{userId}", roomId, userId);
   }
 
-  @Entonces("la respuesta tiene el código {int}")
+  @Entonces("la respuesta tiene el c\u00f3digo {int}")
   public void statusIs(int status) {
     assertThat(response.statusCode()).as(response.asString()).isEqualTo(status);
   }
@@ -103,7 +106,7 @@ public class UserSteps {
         Integer.class, id)).isEqualTo(1);
   }
 
-  @Entonces("el código de error del cuerpo es {int}")
+  @Entonces("el c\u00f3digo de error del cuerpo es {int}")
   public void errorCodeIs(int code) {
     assertThat(response.jsonPath().getInt("code")).isEqualTo(code);
   }
@@ -113,7 +116,7 @@ public class UserSteps {
     assertThat(response.jsonPath().getString("message")).isEqualTo(message);
   }
 
-  @Entonces("el usuario devuelto tiene nombre {string}, email {string}, teléfono {string}, rol {string} y dni {string}")
+  @Entonces("el usuario devuelto tiene nombre {string}, email {string}, tel\u00e9fono {string}, rol {string} y dni {string}")
   public void returnedUserIs(String name, String email, String phone, String rol, String dni) {
     assertThat(response.jsonPath().getLong("id")).isEqualTo(savedUserId);
     assertThat(response.jsonPath().getString("name")).isEqualTo(name);
@@ -135,29 +138,29 @@ public class UserSteps {
     ExternalServicesStub.server().verify(0, patchRequestedFor(urlEqualTo("/check-dni")));
   }
 
-  @Entonces("se envía un email a {string} con el mensaje {string}")
+  @Entonces("se env\u00eda un email a {string} con el mensaje {string}")
   public void emailSent(String email, String message) {
     ExternalServicesStub.server().verify(1, postRequestedFor(urlEqualTo("/email"))
         .withRequestBody(equalToJson("{\"email\": \"" + email + "\", \"message\": \"" + message + "\"}")));
   }
 
-  @Entonces("se envía un SMS al teléfono {string} con el mensaje {string}")
+  @Entonces("se env\u00eda un SMS al tel\u00e9fono {string} con el mensaje {string}")
   public void smsSent(String phone, String message) {
     ExternalServicesStub.server().verify(1, postRequestedFor(urlEqualTo("/sms"))
         .withRequestBody(equalToJson("{\"phone\": \"" + phone + "\", \"message\": \"" + message + "\"}")));
   }
 
-  @Entonces("no se envía ningún email")
+  @Entonces("no se env\u00eda ning\u00fan email")
   public void noEmailSent() {
     ExternalServicesStub.server().verify(0, postRequestedFor(urlEqualTo("/email")));
   }
 
-  @Entonces("no se envía ningún SMS")
+  @Entonces("no se env\u00eda ning\u00fan SMS")
   public void noSmsSent() {
     ExternalServicesStub.server().verify(0, postRequestedFor(urlEqualTo("/sms")));
   }
 
-  @Entonces("no se envía ninguna notificación")
+  @Entonces("no se env\u00eda ninguna notificaci\u00f3n")
   public void noNotificationSent() {
     noEmailSent();
     noSmsSent();

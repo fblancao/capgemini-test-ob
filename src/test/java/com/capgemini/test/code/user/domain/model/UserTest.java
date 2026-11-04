@@ -116,10 +116,10 @@ class UserTest {
 
   @Test
   void restoresPersistedUserWithoutValidatingIt() {
-    User user = User.restore(7L, "Juan Pérez", "juan@example.com", "600000001", Role.ADMIN, "11111111H", 1L);
+    User user = User.restore(7L, "Juan P\u00e9rez", "juan@example.com", "600000001", Role.ADMIN, "11111111H", 1L);
 
     assertThat(user.getId()).isEqualTo(7L);
-    assertThat(user.getName()).isEqualTo("Juan Pérez");
+    assertThat(user.getName()).isEqualTo("Juan P\u00e9rez");
   }
 
   @Test

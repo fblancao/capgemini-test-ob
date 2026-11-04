@@ -41,7 +41,7 @@ class JpaRepositoryAdaptersIT extends PostgresContainerSupport {
   void seededUsersAreReadable() {
     User juan = userRepository.findByIdAndRoomId(1L, 1L).orElseThrow();
 
-    assertThat(juan.getName()).isEqualTo("Juan Pérez");
+    assertThat(juan.getName()).isEqualTo("Juan P\u00e9rez");
     assertThat(juan.getRole()).isEqualTo(Role.ADMIN);
     assertThat(userRepository.findByIdAndRoomId(2L, 2L).orElseThrow().getRole()).isEqualTo(Role.SUPERADMIN);
   }
