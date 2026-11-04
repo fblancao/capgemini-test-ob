@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Tests - 3 Acceptance (Cucumber)" type="JUnit" factoryName="JUnit">
+    <module name="code" />
+    <option name="PACKAGE_NAME" value="com.capgemini.test.code.acceptance" />
+    <option name="MAIN_CLASS_NAME" value="com.capgemini.test.code.acceptance.CucumberAcceptanceIT" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="class" />
+    <option name="PARAMETERS" value="" />
+    <envs>
+      <env name="TESTCONTAINERS_RYUK_DISABLED" value="true" />
+    </envs>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
+

@@ -273,6 +273,21 @@ com.capgemini.test.code
 - CI: GitHub Actions (`.github/workflows/ci.yml`) ejecuta `mvn verify` en cada push / PR a `main`.
 - Con Podman o redes que no permiten descargar la imagen de Ryuk: `TESTCONTAINERS_RYUK_DISABLED=true`.
 
+### Configuraciones de IntelliJ IDEA
+
+En `.run/` se versionan configuraciones de ejecución que IntelliJ carga automáticamente (desplegable *Run/Debug*):
+
+| Configuración                           | Qué hace                                                       |
+|-----------------------------------------|----------------------------------------------------------------|
+| `Infra - docker-compose up`             | Levanta PostgreSQL + mock-server (`docker/docker-compose.yml`) |
+| `App - CodeApplication`                 | Arranca la aplicación (puerto 8080); admite Debug              |
+| `Maven - spring-boot:run`               | Arranca la aplicación con Maven                                |
+| `Tests - 1 Unit`                        | Tests unitarios (`*Test`), sin infraestructura                 |
+| `Tests - 2 Integration`                 | Tests de integración (`*IT`), requiere Docker/Podman           |
+| `Tests - 3 Acceptance (Cucumber)`       | Escenarios Gherkin, requiere Docker/Podman                     |
+| `Tests - 4 All (JUnit)`                 | Todos los tests desde el runner JUnit del IDE                  |
+| `Maven - test (unit)` / `Maven - verify (all tests + coverage)` | Ciclo Maven completo, igual que la CI  |
+
 ## Cambios sobre el esqueleto proporcionado
 
 | Fichero                    | Cambio y motivo                                                                                     |
