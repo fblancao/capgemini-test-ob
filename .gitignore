@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Documentation ###
+# Only Markdown is versioned under docs/ (CI logs, screenshots, exports... stay local).
+# Directories are re-included so the *.md rule also applies to subfolders.
+/docs/**
+!/docs/**/
+!/docs/**/*.md
