@@ -272,6 +272,10 @@ com.capgemini.test.code
 - Informes: `target/cucumber-report.html`, cobertura en `target/site/jacoco` y `target/site/jacoco-it`.
 - CI: GitHub Actions (`.github/workflows/ci.yml`) ejecuta `mvn verify` en cada push / PR a `main`.
 - Con Podman o redes que no permiten descargar la imagen de Ryuk: `TESTCONTAINERS_RYUK_DISABLED=true`.
+- Testcontainers se fija a 1.21.4 (Boot 3.2 trae 1.19.x, cuyo cliente Docker usa la API 1.32, rechazada por
+  Docker Engine 29+, p. ej. en los runners actuales de GitHub Actions).
+- Los escenarios Cucumber sólo se ejecutan mediante la suite `CucumberAcceptanceIT`: `junit-platform.properties`
+  define un filtro de tags que evita que el IDE los lance al escanear el classpath (p. ej. en `Tests - 1 Unit`).
 - Codificación: todo el proyecto es UTF-8 (`.editorconfig`). Los literales Java con tildes (p. ej. los steps de Cucumber)
   usan escapes Unicode (`tel\u00e9fono`) para que los tests no dependan de la codificación del compilador del IDE.
 
