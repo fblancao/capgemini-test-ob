@@ -214,6 +214,8 @@ mvn spring-boot:test-run                  # Ctrl+C para parar: se elimina el con
 - Swagger UI: http://localhost:8080/swagger-ui.html (OpenAPI: `/v3/api-docs`)
 - Health / probes: http://localhost:8080/actuator/health (`/liveness`, `/readiness`)
 - Colección Postman actualizada en `postman/` (incluye las nuevas operaciones).
+- Colección Bruno equivalente (verificada contra el entorno local) en `postman/capgemini.bruno_collection.yml`
+  (Bruno → *Import collection*).
 
 La configuración admite variables de entorno (12-factor): `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `DB_POOL_SIZE`,
 `EXTERNAL_SERVICE_URL`.

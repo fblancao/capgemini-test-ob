@@ -1,0 +1,160 @@
+opencollection: 1.0.0
+info:
+  name: capgemini-ob
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ''
+      port: ''
+      auth:
+        username: ''
+        password: ''
+      bypassProxy: ''
+items:
+  - info:
+      name: create user (invalid dni -> 409)
+      type: http
+      seq: 6
+    http:
+      method: POST
+      url: http://localhost:8080/rooms/1/users
+      body:
+        type: json
+        data: |-
+          {
+              "name": "ana",
+              "email": "ana@email.com",
+              "phone": "677998800",
+              "rol": "superadmin",
+              "dni": "99999999w"
+          }
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+  - info:
+      name: create user (room 1)
+      type: http
+      seq: 5
+    http:
+      method: POST
+      url: http://localhost:8080/rooms/1/users
+      body:
+        type: json
+        data: |-
+          {
+              "name": "pablo",
+              "email": "email@email.com",
+              "phone": "677998899",
+              "rol": "admin",
+              "dni": "23454234W"
+          }
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+  - info:
+      name: email
+      type: http
+      seq: 3
+    http:
+      method: POST
+      url: http://localhost:1080/email
+      body:
+        type: json
+        data: |-
+          {
+              "email": "email@email.com",
+              "message": "usuario guardado"
+          }
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+  - info:
+      name: get user (room 1)
+      type: http
+      seq: 7
+    http:
+      method: GET
+      url: http://localhost:8080/rooms/1/users/1
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+  - info:
+      name: invalid dni
+      type: http
+      seq: 2
+    http:
+      method: PATCH
+      url: http://localhost:1080/check-dni
+      body:
+        type: json
+        data: |-
+          {
+              "dni": "99999999w"
+          }
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+  - info:
+      name: sms
+      type: http
+      seq: 4
+    http:
+      method: POST
+      url: http://localhost:1080/sms
+      body:
+        type: json
+        data: |-
+          {
+              "phone": "677998899",
+              "message": "usuario guardado"
+          }
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+  - info:
+      name: valid dni
+      type: http
+      seq: 1
+    http:
+      method: PATCH
+      url: http://localhost:1080/check-dni
+      body:
+        type: json
+        data: |-
+          {
+              "dni": "222222"
+          }
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+bundled: true
+extensions:
+  bruno:
+    ignore:
+      - node_modules
+      - .git
+    exportedAt: '2026-11-05T11:57:47.233Z'
+    exportedUsing: Bruno
