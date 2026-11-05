@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="App - Local env (Testcontainers)" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.capgemini.test.code.LocalCodeApplication" />
+    <module name="code" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <envs>
+      <env name="TESTCONTAINERS_RYUK_DISABLED" value="true" />
+    </envs>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
+

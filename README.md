@@ -192,6 +192,22 @@ mvn spring-boot:run
 docker-compose --profile app up --build
 ```
 
+### Entorno local sin docker-compose ("Local env")
+
+Si no hay Compose o no se puede descargar la imagen de mock-server, la aplicación se arranca con *servicios de
+desarrollo* (Spring Boot 3.1+): `LocalCodeApplication` (en `src/test`) levanta PostgreSQL 17 con Testcontainers y
+sirve las APIs externas con el stub WireMock en proceso (mismo contrato que `init.json`). Sólo hace falta un motor de
+contenedores en marcha.
+
+```powershell
+podman machine start                      # o Docker en marcha
+$env:TESTCONTAINERS_RYUK_DISABLED="true"  # sólo con Podman (bash: export TESTCONTAINERS_RYUK_DISABLED=true)
+mvn spring-boot:test-run                  # Ctrl+C para parar: se elimina el contenedor
+```
+
+- La base de datos es efímera: cada arranque parte de las migraciones y el seed de Flyway.
+- `mvn spring-boot:run` a secas **no** basta: necesita PostgreSQL en `localhost:5432` y mock-server en `localhost:1080`.
+
 - Swagger UI: http://localhost:8080/swagger-ui.html (OpenAPI: `/v3/api-docs`)
 - Health / probes: http://localhost:8080/actuator/health (`/liveness`, `/readiness`)
 - Colección Postman actualizada en `postman/` (incluye las nuevas operaciones).
@@ -274,8 +290,8 @@ com.capgemini.test.code
 - Con Podman o redes que no permiten descargar la imagen de Ryuk: `TESTCONTAINERS_RYUK_DISABLED=true`.
 - Testcontainers se fija a 1.21.4 (Boot 3.2 trae 1.19.x, cuyo cliente Docker usa la API 1.32, rechazada por
   Docker Engine 29+, p. ej. en los runners actuales de GitHub Actions).
-- Los escenarios Cucumber sólo se ejecutan mediante la suite `CucumberAcceptanceIT`: `junit-platform.properties`
-  define un filtro de tags que evita que el IDE los lance al escanear el classpath (p. ej. en `Tests - 1 Unit`).
+- La configuración de Cucumber (glue, filtro `not @wip`, informe) está en `junit-platform.properties`, así que los
+  escenarios se ejecutan igual desde Maven (`CucumberAcceptanceIT`) o desde el IDE (p. ej. `Tests - 1 Unit`).
 - Codificación: todo el proyecto es UTF-8 (`.editorconfig`). Los literales Java con tildes (p. ej. los steps de Cucumber)
   usan escapes Unicode (`tel\u00e9fono`) para que los tests no dependan de la codificación del compilador del IDE.
 
@@ -288,6 +304,8 @@ En `.run/` se versionan configuraciones de ejecución que IntelliJ carga automá
 | `Infra - docker-compose up`             | Levanta PostgreSQL + mock-server (`docker/docker-compose.yml`) |
 | `App - CodeApplication`                 | Arranca la aplicación (puerto 8080); admite Debug              |
 | `Maven - spring-boot:run`               | Arranca la aplicación con Maven                                |
+| `App - Local env (Testcontainers)`      | "Local env": app + PostgreSQL (Testcontainers) + stub WireMock; admite Debug |
+| `Maven - spring-boot:test-run (Local env)` | Lo mismo con Maven                                          |
 | `Tests - 1 Unit`                        | Tests unitarios (`*Test`), sin infraestructura                 |
 | `Tests - 2 Integration`                 | Tests de integración (`*IT`), requiere Docker/Podman           |
 | `Tests - 3 Acceptance (Cucumber)`       | Escenarios Gherkin, requiere Docker/Podman                     |
