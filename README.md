@@ -206,6 +206,9 @@ mvn spring-boot:test-run                  # Ctrl+C para parar: se elimina el con
 ```
 
 - La base de datos es efímera: cada arranque parte de las migraciones y el seed de Flyway.
+- El stub escucha en `127.0.0.1:1080`, el mismo puerto que publica mock-server en docker-compose, así que las peticiones
+  directas de la colección Postman (`check-dni`, `email`, `sms`) también funcionan. Requiere el puerto 1080 libre
+  (no a la vez que el mock-server de docker-compose); se puede cambiar con `LOCAL_MOCKSERVER_PORT`.
 - `mvn spring-boot:run` a secas **no** basta: necesita PostgreSQL en `localhost:5432` y mock-server en `localhost:1080`.
 
 - Swagger UI: http://localhost:8080/swagger-ui.html (OpenAPI: `/v3/api-docs`)
